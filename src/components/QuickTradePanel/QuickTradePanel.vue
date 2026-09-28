@@ -275,37 +275,116 @@
               />
             </div>
 
-            <!-- Amount (USDT) -->
+            <!-- Amount / quantity -->
             <div class="qt-section qt-amount-block">
-              <div class="qt-amount-label-row">
-                <div class="qt-label">{{ amountLabel }} ({{ orderCurrency }})</div>
-                <span
-                  v-if="embeddedDock && isSwapMode"
-                  class="qt-inline-notional"
-                  :title="$t('quickTrade.marginNotionalFormula', {
+              <template v-if="isCryptoMarket && !isSwapMode">
+                <div class="qt-spot-order-inputs">
+                  <div class="qt-side-amount qt-side-amount--buy">
+                    <div class="qt-amount-label-row">
+                      <div class="qt-label">{{ amountLabel }} ({{ orderCurrency }})</div>
+                      <span class="qt-side-available">{{ $t('quickTrade.available') }} {{ formatPrice(spotBalanceAvailable) }}</span>
+                    </div>
+                    <a-input-number
+                      v-model="amount"
+                      :min="0"
+                      :step="10"
+                      :precision="2"
+                      style="width: 100%"
+                      :placeholder="$t('quickTrade.enterAmount')"
+                    />
+                    <div class="qt-quick-amounts">
+                      <a-button
+                        v-for="percent in [25, 50, 75, 100]"
+                        :key="`buy-${percent}`"
+                        size="small"
+                        :disabled="balanceLoading || spotBalanceAvailable <= 0"
+                        @click="setQuickAmountByPercent(percent, 'buy')"
+                      >{{ percent }}%</a-button>
+                    </div>
+                  </div>
+                  <div class="qt-side-amount qt-side-amount--sell">
+                    <a-radio-group
+                      v-model="spotSellInputMode"
+                      button-style="solid"
+                      size="small"
+                      class="qt-sell-unit-toggle"
+                    >
+                      <a-radio-button value="quantity">{{ $t('quickTrade.byQuantity') }}</a-radio-button>
+                      <a-radio-button value="amount">{{ $t('quickTrade.byAmount') }}</a-radio-button>
+                    </a-radio-group>
+                    <div class="qt-amount-label-row">
+                      <div class="qt-label">
+                        {{ $t(spotSellInputMode === 'quantity' ? 'quickTrade.sellQuantity' : 'quickTrade.sellAmount') }}
+                        ({{ spotSellInputMode === 'quantity' ? baseAsset : orderCurrency }})
+                      </div>
+                      <span class="qt-side-available">
+                        {{ $t('quickTrade.available') }}
+                        {{ spotSellInputMode === 'quantity' ? formatQuantity(spotSellAvailable) : formatPrice(spotSellAvailableValue) }}
+                      </span>
+                    </div>
+                    <a-input-number
+                      v-if="spotSellInputMode === 'quantity'"
+                      v-model="sellQuantity"
+                      :min="0"
+                      :max="spotSellAvailable"
+                      :step="0.0001"
+                      :precision="8"
+                      style="width: 100%"
+                      :placeholder="$t('quickTrade.enterSellQuantity')"
+                    />
+                    <a-input-number
+                      v-else
+                      v-model="sellAmount"
+                      :min="0"
+                      :max="spotSellAvailableValue"
+                      :step="10"
+                      :precision="2"
+                      style="width: 100%"
+                      :placeholder="$t('quickTrade.enterSellAmount')"
+                    />
+                    <div class="qt-quick-amounts">
+                      <a-button
+                        v-for="percent in [25, 50, 75, 100]"
+                        :key="`sell-${percent}`"
+                        size="small"
+                        :disabled="balanceLoading || spotSellAvailable <= 0"
+                        @click="setQuickAmountByPercent(percent, 'sell')"
+                      >{{ percent }}%</a-button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="qt-amount-label-row">
+                  <div class="qt-label">{{ amountLabel }} ({{ orderCurrency }})</div>
+                  <span
+                    v-if="embeddedDock && isSwapMode"
+                    class="qt-inline-notional"
+                    :title="$t('quickTrade.marginNotionalFormula', {
+                      margin: formatPrice(amount),
+                      leverage: leverage,
+                      notional: formatPrice(estimatedNotionalUsdt),
+                      currency: orderCurrency
+                    })"
+                  >≈ {{ formatPrice(estimatedNotionalUsdt) }} {{ orderCurrency }}</span>
+                </div>
+                <a-input-number
+                  v-model="amount"
+                  :min="1"
+                  :step="10"
+                  :precision="2"
+                  style="width: 100%"
+                  :placeholder="$t('quickTrade.enterAmount')"
+                />
+                <div v-if="isSwapMode && !embeddedDock" class="qt-notional-summary">
+                  {{ $t('quickTrade.marginNotionalFormula', {
                     margin: formatPrice(amount),
                     leverage: leverage,
                     notional: formatPrice(estimatedNotionalUsdt),
                     currency: orderCurrency
-                  })"
-                >≈ {{ formatPrice(estimatedNotionalUsdt) }} {{ orderCurrency }}</span>
-              </div>
-              <a-input-number
-                v-model="amount"
-                :min="1"
-                :step="10"
-                :precision="2"
-                style="width: 100%"
-                :placeholder="$t('quickTrade.enterAmount')"
-              />
-              <div v-if="isSwapMode && !embeddedDock" class="qt-notional-summary">
-                {{ $t('quickTrade.marginNotionalFormula', {
-                  margin: formatPrice(amount),
-                  leverage: leverage,
-                  notional: formatPrice(estimatedNotionalUsdt),
-                  currency: orderCurrency
-                }) }}
-              </div>
+                  }) }}
+                </div>
+              </template>
             </div>
           </div>
 
@@ -434,7 +513,7 @@
                 type="primary"
                 size="large"
                 :loading="submittingSide === 'buy'"
-                :disabled="!canSubmit"
+                :disabled="!canSubmitBuy"
                 @click="handleSubmit('buy')"
                 class="qt-submit-btn qt-btn-long"
               >
@@ -445,7 +524,7 @@
                 type="danger"
                 size="large"
                 :loading="submittingSide === 'sell'"
-                :disabled="!canSubmit || (!isSwapMode && currentPositions.length === 0)"
+                :disabled="!canSubmitSell"
                 @click="handleSubmit('sell')"
                 class="qt-submit-btn qt-btn-short"
               >
@@ -760,6 +839,9 @@ export default {
       orderType: 'market',
       limitPrice: 0,
       amount: 100,
+      sellQuantity: null,
+      sellAmount: null,
+      spotSellInputMode: 'quantity',
       leverage: 5,
       tradeMode: 'swap',
       marginMode: 'cross',
@@ -827,6 +909,10 @@ export default {
     amountLabel () {
       return this.$t(this.isSwapMode ? 'quickTrade.marginAmount' : 'quickTrade.amount')
     },
+    baseAsset () {
+      const symbol = String(this.currentSymbol || '').replace(/^[^:]+:/, '')
+      return (symbol.split(/[\/_-]/)[0] || '').toUpperCase() || '-'
+    },
     estimatedNotionalUsdt () {
       const amount = Math.max(0, Number(this.amount) || 0)
       return this.isSwapMode ? amount * Math.max(1, Number(this.leverage) || 1) : amount
@@ -867,6 +953,21 @@ export default {
       if (leg && leg.available != null) return parseFloat(leg.available) || 0
       if (this.isSwapMode) return 0
       return parseFloat(this.balance.available) || 0
+    },
+    spotSellAvailable () {
+      if (!this.isCryptoMarket || this.isSwapMode) return 0
+      return this.currentPositions.reduce((total, position) => {
+        const side = String(position.side || '').toLowerCase()
+        if (side === 'short') return total
+        const quantity = Number(position.available ?? position.free ?? position.size ?? position.quantity ?? position.qty ?? position.amount ?? 0)
+        return total + (Number.isFinite(quantity) ? Math.max(0, quantity) : 0)
+      }, 0)
+    },
+    spotSellReferencePrice () {
+      return Number(this.orderType === 'limit' ? this.limitPrice : this.currentPrice) || 0
+    },
+    spotSellAvailableValue () {
+      return this.spotSellAvailable * this.spotSellReferencePrice
     },
     activeBalanceAvailable () {
       return this.isSwapMode ? this.swapBalanceAvailable : this.spotBalanceAvailable
@@ -941,8 +1042,27 @@ export default {
       if (this.currentPrice > 1) return 2
       return 4
     },
+    submitContextReady () {
+      return Boolean(this.tradableMarketSupported && this.selectedCredentialId && this.selectedCredential && this.currentSymbol && !this.submitting)
+    },
+    canSubmitBuy () {
+      return this.submitContextReady && Number(this.amount) > 0
+    },
+    canSubmitSell () {
+      if (!this.submitContextReady) return false
+      if (this.isCryptoMarket && !this.isSwapMode) {
+        if (this.spotSellInputMode === 'amount') {
+          const requested = Number(this.sellAmount)
+          return this.spotSellReferencePrice > 0 && requested > 0 && requested <= this.spotSellAvailableValue
+        }
+        const requested = Number(this.sellQuantity)
+        return requested > 0 && requested <= this.spotSellAvailable
+      }
+      if (!this.isSwapMode && this.currentPositions.length === 0) return false
+      return Number(this.amount) > 0
+    },
     canSubmit () {
-      return this.tradableMarketSupported && this.selectedCredentialId && this.selectedCredential && this.currentSymbol && this.amount > 0 && !this.submitting
+      return this.canSubmitBuy
     },
     selectedCredential () {
       return this.credentials.find(c => c.id === this.selectedCredentialId)
@@ -997,6 +1117,8 @@ export default {
       }
     },
     currentSymbol (val) {
+      this.sellQuantity = null
+      this.sellAmount = null
       // Reload price and position when symbol changes
       if (val) {
         this.loadPrice()
@@ -1021,6 +1143,8 @@ export default {
       this.syncTradeModeFromProps()
     },
     selectedCredentialId (val) {
+      this.sellQuantity = null
+      this.sellAmount = null
       this.resetBalance()
       this.currentPositions = []
       this.recentTrades = []
@@ -1040,6 +1164,8 @@ export default {
       }
     },
     tradeMode (val) {
+      this.sellQuantity = null
+      this.sellAmount = null
       if (this.isStockMarket && val !== 'spot') {
         this.tradeMode = 'spot'
         return
@@ -1686,8 +1812,32 @@ export default {
         this.dockRefreshing = false
       }
     },
+    setQuickAmountByPercent (percent, side = 'buy') {
+      const ratio = Math.max(0, Math.min(100, Number(percent) || 0)) / 100
+      if (this.isCryptoMarket && !this.isSwapMode && side === 'sell') {
+        if (this.spotSellInputMode === 'amount') {
+          this.sellAmount = Math.floor(this.spotSellAvailableValue * ratio * 100) / 100
+          return
+        }
+        this.sellQuantity = Math.floor(this.spotSellAvailable * ratio * 1e8) / 1e8
+        return
+      }
+      this.amount = Math.floor(this.activeBalanceAvailable * ratio * 100) / 100
+    },
     async handleSubmit (side = 'buy') {
-      if (!this.canSubmit) return
+      const canSubmitSide = side === 'sell' ? this.canSubmitSell : this.canSubmitBuy
+      if (!canSubmitSide) {
+        const exceedsSpotBalance = this.spotSellInputMode === 'amount'
+          ? Number(this.sellAmount) > this.spotSellAvailableValue
+          : Number(this.sellQuantity) > this.spotSellAvailable
+        if (side === 'sell' && this.isCryptoMarket && !this.isSwapMode && exceedsSpotBalance) {
+          this.$notification.error({
+            message: this.$t('quickTrade.orderFailed'),
+            description: this.$t('quickTrade.insufficientSpotQuantity')
+          })
+        }
+        return
+      }
       this.side = side
       this.submitting = true
       this.submittingSide = side
@@ -1697,12 +1847,14 @@ export default {
           return
         }
         const useProtectionPrices = !this.embeddedDock || this.dockTpslEnabled
+        const isSpotSell = this.isCryptoMarket && !this.isSwapMode && side === 'sell'
+        const sellByQuantity = isSpotSell && this.spotSellInputMode === 'quantity'
         const payload = {
           credential_id: this.selectedCredentialId,
           symbol: this.currentSymbol,
           side,
           order_type: this.orderType,
-          amount: this.amount,
+          amount: isSpotSell ? (sellByQuantity ? 0 : Number(this.sellAmount)) : Number(this.amount),
           price: this.orderType === 'limit' ? this.limitPrice : 0,
           leverage: this.isSwapMode ? this.leverage : 1,
           market_type: this.effectiveMarketType,
@@ -1712,6 +1864,7 @@ export default {
           source: this.source,
           ai_decision_filter: this.aiDecisionFilter
         }
+        if (sellByQuantity) payload.quantity = Number(this.sellQuantity)
         const res = await placeQuickOrder(payload)
         if (res.code === 1) {
           // Emit event for parent component (parent will show success message)
@@ -3433,6 +3586,45 @@ export default {
   padding-bottom: 14px;
 }
 
+.qt-spot-order-inputs {
+  display: grid;
+  gap: 10px;
+}
+
+.qt-side-amount {
+  padding: 9px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.qt-side-amount--buy {
+  border-left: 3px solid #52c41a;
+}
+
+.qt-side-amount--sell {
+  border-left: 3px solid #f5222d;
+}
+
+.qt-sell-unit-toggle {
+  display: flex;
+  margin-bottom: 8px;
+
+  ::v-deep .ant-radio-button-wrapper {
+    flex: 1;
+    height: 26px;
+    padding: 0 8px;
+    text-align: center;
+    line-height: 24px;
+  }
+}
+
+.qt-side-available {
+  color: #8c8c8c;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
 .qt-quick-amounts {
   display: flex;
   gap: 6px;
@@ -3962,6 +4154,11 @@ export default {
   .qt-section {
     .qt-label { color: #777; }
   }
+  .qt-side-amount {
+    border-color: #303030;
+    background: #141414;
+  }
+  .qt-side-available { color: #777; }
   .qt-position-section {
     .qt-section-header { color: #ccc; }
     .qt-position-count { color: #888; }
