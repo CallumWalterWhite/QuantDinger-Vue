@@ -11,6 +11,7 @@ import fundamentalSyncMessages from './lang/fundamental-sync'
 import strategyLiveRiskMessages from './lang/strategy-live-risk'
 import robotBuilderMessages from './lang/robot-builder-overrides'
 import billingPaymentMessages from './billing-payment-overrides'
+import referralRewardMessages from './referral-reward-overrides'
 import adminOrderMessages from './admin-order-overrides'
 import strategyTradeRecordMessages from './lang/strategy-trade-records'
 import quickTradeRecordMessages from './quick-trade-records'
@@ -23,6 +24,7 @@ import reviewedUiOverrides from './reviewed-ui-overrides'
 import professionalReportOverrides from './professional-report-overrides'
 import backtestRangeOverrides from './backtest-range-overrides'
 import settingsResearchOverrides from './settings-research-overrides'
+import settingsRuntimeOverrides from './settings-runtime-overrides'
 import strategyBuilderOverrides from './strategy-builder-overrides'
 import eventRadarMessages from './lang/event-radar'
 import currentFeatureOverrides from './lang/current-feature-overrides'
@@ -44,6 +46,7 @@ const messages = {
     ...(strategyLiveRiskMessages[defaultLang] || {}),
     ...(robotBuilderMessages[defaultLang] || {}),
     ...(billingPaymentMessages[defaultLang] || {}),
+    ...(referralRewardMessages[defaultLang] || {}),
     ...(adminOrderMessages[defaultLang] || {}),
     ...(strategyTradeRecordMessages[defaultLang] || {}),
     ...(quickTradeRecordMessages[defaultLang] || {}),
@@ -56,6 +59,7 @@ const messages = {
     ...(professionalReportOverrides[defaultLang] || {}),
     ...(backtestRangeOverrides[defaultLang] || {}),
     ...(settingsResearchOverrides[defaultLang] || {}),
+    ...(settingsRuntimeOverrides[defaultLang] || {}),
     ...(strategyBuilderOverrides[defaultLang] || {}),
     ...(currentFeatureOverrides[defaultLang] || {}),
     ...(eventRadarMessages[defaultLang] || {}),
@@ -136,6 +140,7 @@ function mergeLocaleOverrides (lang) {
     ...(strategyLiveRiskMessages[lang] || {}),
     ...(robotBuilderMessages[lang] || {}),
     ...(billingPaymentMessages[lang] || {}),
+    ...(referralRewardMessages[lang] || {}),
     ...(adminOrderMessages[lang] || {}),
     ...(strategyTradeRecordMessages[lang] || {}),
     ...(quickTradeRecordMessages[lang] || {}),
@@ -148,6 +153,7 @@ function mergeLocaleOverrides (lang) {
     ...(professionalReportOverrides[lang] || {}),
     ...(backtestRangeOverrides[lang] || {}),
     ...(settingsResearchOverrides[lang] || {}),
+    ...(settingsRuntimeOverrides[lang] || {}),
     ...(strategyBuilderOverrides[lang] || {}),
     ...(currentFeatureOverrides[lang] || {}),
     ...(eventRadarMessages[lang] || {}),
@@ -182,6 +188,7 @@ export async function loadLanguageAsync (lang = defaultLang) {
       ...(strategyLiveRiskMessages[lang] || {}),
       ...(robotBuilderMessages[lang] || {}),
       ...(billingPaymentMessages[lang] || {}),
+      ...(referralRewardMessages[lang] || {}),
       ...(adminOrderMessages[lang] || {}),
       ...(strategyTradeRecordMessages[lang] || {}),
       ...(quickTradeRecordMessages[lang] || {}),
@@ -194,6 +201,7 @@ export async function loadLanguageAsync (lang = defaultLang) {
       ...(professionalReportOverrides[lang] || {}),
       ...(backtestRangeOverrides[lang] || {}),
       ...(settingsResearchOverrides[lang] || {}),
+      ...(settingsRuntimeOverrides[lang] || {}),
       ...(strategyBuilderOverrides[lang] || {}),
       ...(currentFeatureOverrides[lang] || {}),
       ...(eventRadarMessages[lang] || {}),

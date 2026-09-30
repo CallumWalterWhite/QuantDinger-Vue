@@ -122,6 +122,56 @@ test('PC spot sell can submit a USDT value without a quantity field', async () =
   assert.equal(calls[0].market_type, 'spot')
 })
 
+test('PC spot buy can submit an exact base asset quantity', async () => {
+  const calls = []
+  const component = options('components/QuickTradePanel/QuickTradePanel.vue', {
+    placeQuickOrder: async payload => {
+      calls.push(payload)
+      return { code: 1, data: { id: 93 } }
+    }
+  })
+  const state = {
+    canSubmitBuy: true,
+    canSubmitSell: true,
+    isStockMarket: false,
+    isCryptoMarket: true,
+    isSwapMode: false,
+    spotBuyInputMode: 'quantity',
+    spotSellInputMode: 'quantity',
+    buyQuantity: 0.00123456,
+    amount: 250,
+    side: 'buy',
+    submitting: false,
+    submittingSide: '',
+    embeddedDock: false,
+    dockTpslEnabled: false,
+    selectedCredentialId: 7,
+    currentSymbol: 'BTC/USDT',
+    orderType: 'market',
+    limitPrice: 0,
+    leverage: 1,
+    effectiveMarketType: 'spot',
+    marginMode: 'cross',
+    tpPrice: null,
+    slPrice: null,
+    source: 'indicator',
+    aiDecisionFilter: false,
+    $emit: () => {},
+    $t: key => key,
+    $notification: { error: () => {}, warning: () => {} },
+    loadBalance: async () => {},
+    loadHistory: async () => {},
+    loadPositionWithRetry: async () => {}
+  }
+
+  await component.methods.handleSubmit.call(state, 'buy')
+
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].amount, 0)
+  assert.equal(calls[0].quantity, 0.00123456)
+  assert.equal(calls[0].side, 'buy')
+})
+
 test('PC spot sell percentages use the base asset holding', () => {
   const component = options('components/QuickTradePanel/QuickTradePanel.vue')
   const state = {
