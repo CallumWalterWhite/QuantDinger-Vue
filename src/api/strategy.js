@@ -89,6 +89,13 @@ export function stopStrategy (id, closePositions = false) {
   })
 }
 
+export function getStrategyCommandStatus (id, commandId) {
+  return request({
+    url: `${api.strategies}/${id}/commands/${commandId}`,
+    method: 'get'
+  })
+}
+
 export function startStrategy (id) {
   return request({
     url: `${api.strategies}/${id}/start`,
