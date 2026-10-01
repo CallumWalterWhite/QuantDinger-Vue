@@ -3095,7 +3095,8 @@ registerOverlay({
     }
 
     const handleWsReconnected = () => {
-      stopRestPolling()
+      startRestPolling({ kick: true, kickDelay: 0 })
+      scheduleRealtimeKlineResync()
     }
 
     const handleWsError = () => {
@@ -3123,23 +3124,25 @@ registerOverlay({
       if (!props.realtimeEnabled || !props.symbol || klineData.value.length === 0) return
       if (isCryptoMarket()) {
         startRestPolling({ kick: true, kickDelay: 2500 })
-        if (String(props.marketType || 'spot').toLowerCase() !== 'spot') return
         try {
           const exchangeId = props.exchangeId || await _fetchExchangeId()
           if (gen !== _realtimeGeneration) return
-          if (!['binance', 'bitget', 'bybit', 'okx', 'gate'].includes(String(exchangeId).toLowerCase())) return
+          if (!['binance', 'bitget', 'bybit', 'okx', 'gate', 'htx', 'huobi'].includes(String(exchangeId).toLowerCase())) return
           if (!wsClient) {
             wsClient = new ExchangeKlineWs()
           }
-          wsClient.connect(props.symbol, props.timeframe, {
+          const connecting = wsClient.connect(props.symbol, props.timeframe, {
             onTick: handleWsTick,
             onNewBar: handleWsNewBar,
             onError: handleWsError,
             onReconnecting: handleWsReconnecting,
             onReconnected: handleWsReconnected
-          }, exchangeId)
-          wsActive.value = true
-          armWsStaleWatchdog()
+          }, exchangeId, {
+            marketType: props.marketType,
+            instrumentId: props.instrumentId
+          })
+          wsActive.value = Boolean(connecting)
+          if (connecting) armWsStaleWatchdog()
         } catch (_) {
           if (gen !== _realtimeGeneration) return
           wsActive.value = false
