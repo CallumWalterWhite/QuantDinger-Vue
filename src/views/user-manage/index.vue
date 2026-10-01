@@ -374,7 +374,10 @@
                 {{ formatPnl(strategySummary.live_pnl) }}
                 <span class="roi-badge">{{ strategySummary.live_roi || 0 }}%</span>
               </div>
-              <div class="summary-sub">{{ $t('systemOverview.livePnlDesc') }}</div>
+              <div class="summary-sub">
+                {{ $t('systemOverview.livePnlDesc') }}
+                · {{ $t('systemOverview.virtualPnl') }} {{ formatPnl(strategySummary.signal_pnl) }}
+              </div>
               <div class="summary-label">{{ $t('systemOverview.livePnl') }}</div>
             </div>
           </div>
@@ -542,14 +545,23 @@
 
             <!-- Capital Column -->
             <template slot="capitalInfo" slot-scope="text, record">
-              <span v-if="record.execution_mode === 'live'">{{ formatNumber(text) }}</span>
-              <span v-else class="text-muted">{{ $t('systemOverview.notApplicable') }}</span>
+              <div class="ledger-value-cell">
+                <span>{{ formatNumber(text) }}</span>
+                <small v-if="record.ledger_mode === 'virtual'" class="virtual-ledger-label">
+                  {{ $t('systemOverview.virtualAccount') }}
+                </small>
+              </div>
             </template>
 
             <!-- Execution mode -->
-            <template slot="executionModeInfo" slot-scope="text">
+            <template slot="executionModeInfo" slot-scope="text, record">
               <a-tag v-if="text === 'live'" color="green" size="small">{{ $t('systemOverview.live') || 'Live' }}</a-tag>
-              <a-tag v-else-if="text === 'signal'" color="blue" size="small">{{ $t('systemOverview.signal') || 'Signal' }}</a-tag>
+              <div v-else-if="text === 'signal'" class="execution-mode-stack">
+                <a-tag color="blue" size="small">{{ $t('systemOverview.signal') || 'Signal' }}</a-tag>
+                <small v-if="record.ledger_mode === 'virtual'" class="virtual-ledger-label">
+                  {{ $t('systemOverview.virtualLedger') }}
+                </small>
+              </div>
               <a-tag v-else size="small">{{ text || '—' }}</a-tag>
             </template>
 
@@ -561,21 +573,23 @@
 
             <!-- PnL Column -->
             <template slot="pnlInfo" slot-scope="text, record">
-              <div v-if="record.execution_mode === 'live'" :class="record.total_pnl >= 0 ? 'text-profit' : 'text-loss'">
+              <div :class="record.total_pnl >= 0 ? 'text-profit' : 'text-loss'">
                 <span class="pnl-value">{{ formatPnl(record.total_pnl) }}</span>
                 <span class="roi-text">({{ record.roi >= 0 ? '+' : '' }}{{ record.roi }}%)</span>
               </div>
-              <div v-if="record.execution_mode === 'live'" class="pnl-detail text-muted">
+              <div class="pnl-detail text-muted">
                 <span>{{ $t('systemOverview.realized') || 'Real' }}: {{ formatPnl(record.total_realized_pnl) }}</span>
                 <span style="margin-left: 8px">{{ $t('systemOverview.unrealized') || 'Unreal' }}: {{ formatPnl(record.total_unrealized_pnl) }}</span>
               </div>
-              <span v-else class="text-muted">{{ $t('systemOverview.signalOnlyNoPnl') }}</span>
             </template>
 
             <template slot="runtimeInfo" slot-scope="text, record">
               <div class="runtime-cell">
                 <span><a-icon type="pie-chart" /> {{ $t('systemOverview.positionsShort') }} {{ record.position_count || 0 }}</span>
                 <span><a-icon type="swap" /> {{ $t('systemOverview.tradesShort') }} {{ record.trade_count || 0 }}</span>
+                <small v-if="record.ledger_mode === 'virtual'" class="virtual-ledger-label">
+                  {{ $t('systemOverview.virtualLedger') }}
+                </small>
               </div>
             </template>
 
@@ -3812,6 +3826,21 @@ export default {
     margin-top: 2px;
   }
 
+  .ledger-value-cell,
+  .execution-mode-stack {
+    display: grid;
+    gap: 3px;
+    justify-items: start;
+  }
+
+  .virtual-ledger-label {
+    color: #1677ff;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
   .symbol-text {
     font-weight: 500;
   }
@@ -3959,6 +3988,10 @@ export default {
       border-radius: 5px;
       color: #64748b;
       font-size: 10px;
+    }
+
+    .virtual-ledger-label {
+      flex-basis: 100%;
     }
   }
 
