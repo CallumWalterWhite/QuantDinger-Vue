@@ -3108,8 +3108,8 @@ registerOverlay({
       if (_cachedExchangeId && (now - _exchangeIdTs) < 300000) return _cachedExchangeId
       try {
         const res = await request({ url: '/api/settings/public-config', method: 'get' })
-        if (res && res.data && res.data.ccxt_default_exchange) {
-          _cachedExchangeId = res.data.ccxt_default_exchange
+        if (res && res.data && res.data.crypto_public_default_exchange) {
+          _cachedExchangeId = res.data.crypto_public_default_exchange
           _exchangeIdTs = now
         }
       } catch (_) { /* keep cached or null */ }

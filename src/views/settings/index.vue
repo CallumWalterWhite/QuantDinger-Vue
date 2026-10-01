@@ -1573,7 +1573,7 @@ export default {
           badge: 'US · HK · Crypto',
           badgeColor: 'blue',
           keys: [
-            'CCXT_DEFAULT_EXCHANGE',
+            'CRYPTO_PUBLIC_DEFAULT_EXCHANGE',
             'FINNHUB_API_KEY',
             'FINNHUB_FREE_ONLY',
             'TWELVE_DATA_API_KEY',
