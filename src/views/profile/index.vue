@@ -640,6 +640,7 @@
                   </a-button>
                 </a-form-item>
               </a-form>
+              <digest-settings-card />
             </div>
           </a-tab-pane>
 
@@ -852,6 +853,7 @@ import { createReferralWithdrawal, getReferralRewards } from '@/api/billing'
 import { getSettingsValues } from '@/api/settings'
 import { baseMixin } from '@/store/app-mixin'
 import ProfileAgentTokens from '@/views/profile/components/ProfileAgentTokens.vue'
+import DigestSettingsCard from '@/views/event-calendar/DigestSettingsCard'
 import { formatBrowserLocalDateTime } from '@/utils/userTime'
 
 const DEFAULT_NOTIFICATION_CHANNELS = ['browser', 'email']
@@ -861,7 +863,7 @@ const normalizeNotificationChannels = channels => (
 
 export default {
   name: 'Profile',
-  components: { ProfileAgentTokens },
+  components: { ProfileAgentTokens, DigestSettingsCard },
   mixins: [baseMixin],
   data () {
     return {

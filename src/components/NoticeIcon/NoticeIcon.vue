@@ -76,6 +76,9 @@
 
         <div class="notice-detail-content" :class="{ 'html-report': isHtmlReport }">
           <div v-html="displayMessageHtml(detailNotice)" class="message-body"></div>
+          <p v-if="detailNotice.signal_type === 'pre_event_digest'" class="digest-disclaimer">
+            {{ $t('events.disclaimer') }}
+          </p>
         </div>
 
         <template v-if="hasExtraDetail">
@@ -137,6 +140,10 @@
           <a-button v-if="detailNotice.payload && detailNotice.payload.monitor_id" type="primary" @click="goToPortfolio">
             <a-icon type="fund" />
             {{ $t('notice.viewPortfolio') }}
+          </a-button>
+          <a-button v-if="detailNotice.signal_type === 'pre_event_digest'" type="primary" @click="goToEventCalendar">
+            <a-icon type="calendar" />
+            {{ $t('notice.viewDigests') }}
           </a-button>
           <a-button @click="detailVisible = false">
             {{ $t('notice.close') }}
@@ -289,7 +296,8 @@ export default {
         hold: 'pause-circle',
         trade: 'swap',
         security_login: 'safety-certificate',
-        profile_test: 'experiment'
+        profile_test: 'experiment',
+        pre_event_digest: 'calendar'
       }
       return iconMap[signalType] || 'notification'
     },
@@ -304,7 +312,8 @@ export default {
         hold: '#faad14',
         trade: '#13c2c2',
         security_login: '#fa541c',
-        profile_test: '#2f54eb'
+        profile_test: '#2f54eb',
+        pre_event_digest: '#08979c'
       }
       return colorMap[signalType] || 'var(--primary-color, #1890ff)'
     },
@@ -396,6 +405,11 @@ export default {
     goToPortfolio () {
       this.detailVisible = false
       this.$router.push({ path: '/strategy-center' }).catch(() => {})
+    },
+    goToEventCalendar () {
+      this.detailVisible = false
+      this.visible = false
+      this.$router.push({ path: '/event-calendar', query: { tab: 'digests' } }).catch(() => {})
     },
     async markAsRead (id) {
       const item = this.notifications.find(n => n.id === id)

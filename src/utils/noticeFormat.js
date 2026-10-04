@@ -334,6 +334,11 @@ export function noticeTitle (item, t) {
 }
 
 export function noticeMessage (item, t, { html = false } = {}) {
+  // Research output is plain text, even when it contains HTML-looking evidence.
+  if (item && item.signal_type === 'pre_event_digest') {
+    const raw = String(item.message || '')
+    return html ? escapeHtml(raw).replace(/\n/g, '<br>') : raw
+  }
   const rendered = renderFromDisplay(item, t, { html })
   if (rendered && rendered.message) return rendered.message
   const raw = (item && item.message) || ''
@@ -357,6 +362,9 @@ export function noticePreview (item, t, maxLen = 80) {
 }
 
 export function noticeMessageHtml (item, t) {
+  if (item && item.signal_type === 'pre_event_digest') {
+    return noticeMessage(item, t, { html: true })
+  }
   const raw = (item && item.message) || ''
   if (raw.includes('<div class="qd-report">') || raw.includes('<style>')) {
     return raw
@@ -382,7 +390,8 @@ export function noticeTypeLabel (signalType, t) {
     trade: ['notice.type.trade', 'Trade Execution'],
     indicator_signal: ['notice.type.indicatorSignal', 'Indicator Signal'],
     security_login: ['notice.type.securityLogin', 'Login Alert'],
-    profile_test: ['notice.type.profileTest', 'Test Notification']
+    profile_test: ['notice.type.profileTest', 'Test Notification'],
+    pre_event_digest: ['notice.type.preEventDigest', 'Earnings Digest']
   }
   const pair = map[signalType] || ['notice.type.notification', 'Notification']
   return tx(t, pair[0], pair[1])

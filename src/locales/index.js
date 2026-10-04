@@ -27,6 +27,7 @@ import settingsResearchOverrides from './settings-research-overrides'
 import settingsRuntimeOverrides from './settings-runtime-overrides'
 import strategyBuilderOverrides from './strategy-builder-overrides'
 import eventRadarMessages from './lang/event-radar'
+import eventsMessages from './lang/events'
 import currentFeatureOverrides from './lang/current-feature-overrides'
 import strategyEvolutionMessages from './lang/strategy-evolution'
 import quickTradeSpotSellMessages from './lang/quick-trade-spot-sell'
@@ -63,6 +64,7 @@ const messages = {
     ...(strategyBuilderOverrides[defaultLang] || {}),
     ...(currentFeatureOverrides[defaultLang] || {}),
     ...(eventRadarMessages[defaultLang] || {}),
+    ...(eventsMessages[defaultLang] || {}),
     ...(strategyEvolutionMessages[defaultLang] || {}),
     ...(quickTradeSpotSellMessages[defaultLang] || {})
   }
@@ -157,6 +159,7 @@ function mergeLocaleOverrides (lang) {
     ...(strategyBuilderOverrides[lang] || {}),
     ...(currentFeatureOverrides[lang] || {}),
     ...(eventRadarMessages[lang] || {}),
+    ...(eventsMessages[lang] || {}),
     ...(strategyEvolutionMessages[lang] || {}),
     ...(quickTradeSpotSellMessages[lang] || {})
   }
@@ -205,6 +208,7 @@ export async function loadLanguageAsync (lang = defaultLang) {
       ...(strategyBuilderOverrides[lang] || {}),
       ...(currentFeatureOverrides[lang] || {}),
       ...(eventRadarMessages[lang] || {}),
+      ...(eventsMessages[lang] || {}),
       ...(quickTradeSpotSellMessages[lang] || {})
     })
     i18n.setLocaleMessage(lang, locale)

@@ -389,6 +389,9 @@
                             {{ productTypeLabel(w.product_type) }}
                           </a-tag>
                           <span v-if="w.name" class="wl-opt-name">{{ w.name }}</span>
+                          <a-tag v-if="earningsBadgeFor(w)" color="orange" class="wl-earnings-tag">
+                            {{ $t(earningsBadgeFor(w).key, { days: earningsBadgeFor(w).days }) }}
+                          </a-tag>
                         </a-select-option>
                         <a-select-option key="__add__" value="__add__" class="add-option">
                           <div class="ide-watchlist-add-row">
@@ -1134,6 +1137,8 @@
 </template>
 
 <script>
+import { getUpcomingEvents } from '@/api/events'
+import { earningsBadge, indexUpcomingBySymbol } from '@/views/event-calendar/eventCalendarFormat.mjs'
 import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/python/python'
@@ -1233,6 +1238,7 @@ export default {
       currentInstrumentId: '',
       cryptoExchangeIds: CRYPTO_EXCHANGE_IDS,
       watchlist: [],
+      upcomingBySymbol: {},
       loadingWatchlist: false,
       selectedWatchlistKey: 'Crypto:BTC/USDT',
 
@@ -1529,6 +1535,7 @@ export default {
     })
   },
   activated () {
+    this.loadUpcomingEarnings()
     if (this._saveShortcutListener) {
       window.addEventListener('keydown', this._saveShortcutListener)
     }
@@ -1572,6 +1579,16 @@ export default {
     } catch (_) {}
   },
   methods: {
+    async loadUpcomingEarnings () {
+      try {
+        const res = await getUpcomingEvents(14)
+        this.upcomingBySymbol = res && res.code === 1 ? indexUpcomingBySymbol(res.data) : {}
+      } catch (_) { this.upcomingBySymbol = {} }
+    },
+    earningsBadgeFor (row) {
+      if (!row || row.market !== 'USStock') return null
+      return earningsBadge(this.upcomingBySymbol[String(row.symbol || '').trim().toUpperCase()])
+    },
     restoreChartTypePreference () {
       const supported = new Set(['candle_solid', 'candle_stroke', 'candle_up_stroke', 'candle_down_stroke', 'ohlc', 'area'])
       const saved = storage.get(chartTypeStorageKey(this.userId))
@@ -1916,6 +1933,7 @@ export default {
         const res = await getWatchlist({ userid: this.userId })
         if (res && res.code === 1 && res.data) this.watchlist = res.data
         this.reconcileIdeMarketFromWatchlist()
+        this.loadUpcomingEarnings()
       } catch (_) { /* silent */ } finally {
         this.loadingWatchlist = false
       }

@@ -68,6 +68,12 @@ export const asyncRouterMap = [
         component: () => import('@/views/broker-accounts'),
         meta: { title: 'menu.dashboard.brokerAccounts', keepAlive: true, icon: 'bank', permission: ['dashboard'] }
       },
+      {
+        path: '/event-calendar',
+        name: 'EventCalendar',
+        component: () => import('@/views/event-calendar'),
+        meta: { title: 'menu.dashboard.eventCalendar', keepAlive: true, icon: 'calendar', permission: ['dashboard'] }
+      },
       // Legacy chart route.
       {
         path: '/indicator-analysis',
