@@ -1,5 +1,29 @@
 import request from '@/utils/request'
 
+export function getResearchOverview () {
+  return request({ url: '/api/settings/research-ingestion/overview', method: 'get' })
+}
+
+export function getResearchListings (params) {
+  return request({ url: '/api/settings/research-ingestion/listings', method: 'get', params })
+}
+
+export function getResearchJob (id, params) {
+  return request({ url: `/api/settings/research-ingestion/jobs/${id}`, method: 'get', params })
+}
+
+export function syncResearch (data) {
+  return request({ url: '/api/settings/research-ingestion/sync', method: 'post', data })
+}
+
+export function retryResearch (id, data) {
+  return request({ url: `/api/settings/research-ingestion/jobs/${id}/retry`, method: 'post', data })
+}
+
+export function scheduleResearch (data) {
+  return request({ url: '/api/settings/research-ingestion/schedule', method: 'put', data })
+}
+
 export function getSettingsSchema () {
   return request({
     url: '/api/settings/schema',

@@ -424,6 +424,7 @@
                 </a-spin>
               </a-spin>
               <FundamentalSyncPanel :universes="systemUniverseRows" :dark="isDarkTheme" />
+              <ResearchIngestionPanel :dark="isDarkTheme" />
             </div>
 
             <div v-if="activeGroupKey === 'ai' && currentLlmProvider === 'openrouter'" class="openrouter-balance-card">
@@ -883,10 +884,11 @@ import { getSystemUniverseOverview, syncSystemUniverses } from '@/api/universe'
 import { deleteAdminMembershipPlan, getAdminMembershipPlans, saveAdminMembershipPlans } from '@/api/billing'
 import { baseMixin } from '@/store/app-mixin'
 import FundamentalSyncPanel from './FundamentalSyncPanel.vue'
+import ResearchIngestionPanel from './ResearchIngestionPanel.vue'
 
 export default {
   name: 'Settings',
-  components: { FundamentalSyncPanel },
+  components: { FundamentalSyncPanel, ResearchIngestionPanel },
   mixins: [baseMixin],
   data () {
     return {

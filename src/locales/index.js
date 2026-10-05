@@ -8,6 +8,7 @@ import profileSecurityMessages from './lang/profile-security'
 import brokerAccountWorkspaceMessages from './lang/broker-account-workspace'
 import strategyV2Messages from './lang/strategy-v2'
 import fundamentalSyncMessages from './lang/fundamental-sync'
+import researchIngestionMessages from './lang/research-ingestion'
 import strategyLiveRiskMessages from './lang/strategy-live-risk'
 import robotBuilderMessages from './lang/robot-builder-overrides'
 import billingPaymentMessages from './billing-payment-overrides'
@@ -44,6 +45,7 @@ const messages = {
     ...(brokerAccountWorkspaceMessages[defaultLang] || {}),
     ...(strategyV2Messages[defaultLang] || {}),
     ...(fundamentalSyncMessages[defaultLang] || {}),
+    ...(researchIngestionMessages[defaultLang] || {}),
     ...(strategyLiveRiskMessages[defaultLang] || {}),
     ...(robotBuilderMessages[defaultLang] || {}),
     ...(billingPaymentMessages[defaultLang] || {}),
@@ -139,6 +141,7 @@ function mergeLocaleOverrides (lang) {
     ...(brokerAccountWorkspaceMessages[lang] || {}),
     ...(strategyV2Messages[lang] || {}),
     ...(fundamentalSyncMessages[lang] || {}),
+    ...(researchIngestionMessages[lang] || {}),
     ...(strategyLiveRiskMessages[lang] || {}),
     ...(robotBuilderMessages[lang] || {}),
     ...(billingPaymentMessages[lang] || {}),
@@ -188,6 +191,7 @@ export async function loadLanguageAsync (lang = defaultLang) {
       ...(brokerAccountWorkspaceMessages[lang] || {}),
       ...(strategyV2Messages[lang] || {}),
       ...(fundamentalSyncMessages[lang] || {}),
+      ...(researchIngestionMessages[lang] || {}),
       ...(strategyLiveRiskMessages[lang] || {}),
       ...(robotBuilderMessages[lang] || {}),
       ...(billingPaymentMessages[lang] || {}),
