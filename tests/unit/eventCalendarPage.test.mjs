@@ -7,6 +7,7 @@ const page = fs.readFileSync('src/views/event-calendar/index.vue', 'utf8')
 const card = fs.readFileSync('src/views/event-calendar/DigestSettingsCard.vue', 'utf8')
 const router = fs.readFileSync('src/config/router.config.js', 'utf8')
 const profile = fs.readFileSync('src/views/profile/index.vue', 'utf8')
+const marketPage = fs.readFileSync('src/views/event-calendar/MarketCalendar.vue', 'utf8')
 
 test('event calendar route is registered with a localized title', () => {
   assert.match(router, /path: '\/event-calendar'/)
@@ -48,4 +49,15 @@ test('no hardcoded english copy in templates', () => {
     const template = src.split('<script>')[0]
     assert.doesNotMatch(template, />\s*(Upcoming earnings|Digest history|Save|Bull case)\s*</)
   }
+})
+
+test('market tab offers bounded server search and explicit free coverage warnings', () => {
+  assert.match(page, /<market-calendar/)
+  assert.match(marketPage, /getMarketCalendar/)
+  assert.match(marketPage, /events\.market\.limitations/)
+  assert.match(marketPage, /events\.market\.disabled/)
+  assert.match(marketPage, /:max-length="100"/)
+  assert.match(marketPage, /requestId/)
+  assert.match(marketPage, /page_size/)
+  assert.doesNotMatch(marketPage, /v-html|placeQuickOrder|saveDigestSettings/)
 })

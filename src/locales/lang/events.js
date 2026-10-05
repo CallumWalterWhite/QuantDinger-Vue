@@ -1,3 +1,5 @@
+import marketEarningsMessages from './marketEarnings.js'
+
 const en = {
   'menu.dashboard.eventCalendar': 'Event Calendar',
   'events.title': 'Event Calendar',
@@ -633,5 +635,9 @@ Object.keys(localizedValues).forEach(code => {
   }
   messages[code] = Object.fromEntries(eventKeys.map((key, index) => [key, localizedValues[code][index]]))
 })
+
+for (const [locale, bundle] of Object.entries(marketEarningsMessages)) {
+  Object.assign(messages[locale], bundle)
+}
 
 export default messages

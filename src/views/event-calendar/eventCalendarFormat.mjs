@@ -4,6 +4,18 @@ const STANCES = ['bullish', 'bearish', 'neutral', 'unclear']
 const ACTIONS = ['consider_buying', 'consider_trimming', 'watch', 'no_action']
 const BADGE_MAX_DAYS = 14
 
+export function marketEventKey (row) {
+  return [row.market, row.exchange, row.symbol, row.event_type, row.event_date].join(':')
+}
+
+export function coverageKey (status) {
+  return `events.market.status.${['ready', 'unavailable', 'stale', 'degraded', 'refreshing'].includes(status) ? status : 'unavailable'}`
+}
+
+export function dateStatusKey (status) {
+  return `events.market.date.${['confirmed', 'estimated', 'unknown'].includes(status) ? status : 'unknown'}`
+}
+
 export function stanceColor (stance) {
   return STANCE_COLORS[stance] || 'default'
 }

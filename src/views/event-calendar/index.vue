@@ -4,6 +4,9 @@
       <a-col :xs="24" :lg="17">
         <a-card :title="$t('events.title')">
           <a-tabs v-model="activeTab">
+            <a-tab-pane key="market" :tab="$t('events.market.title')">
+              <market-calendar />
+            </a-tab-pane>
             <a-tab-pane key="upcoming" :tab="$t('events.tab.upcoming')">
               <a-table
                 :columns="upcomingColumns"
@@ -79,14 +82,15 @@
 <script>
 import { getEventDigests, getUpcomingEvents } from '@/api/events'
 import DigestSettingsCard from './DigestSettingsCard'
+import MarketCalendar from './MarketCalendar'
 import { actionKey, earningsBadge, normalizeDigest, stanceColor } from './eventCalendarFormat.mjs'
 
 export default {
   name: 'EventCalendar',
-  components: { DigestSettingsCard },
+  components: { DigestSettingsCard, MarketCalendar },
   data () {
     return {
-      activeTab: 'upcoming',
+      activeTab: 'market',
       upcoming: [],
       digests: [],
       loadingUpcoming: false,
@@ -120,13 +124,13 @@ export default {
     }
   },
   mounted () {
-    this.activeTab = this.$route.query.tab === 'digests' ? 'digests' : 'upcoming'
+    this.activeTab = ['market', 'upcoming', 'digests'].includes(this.$route.query.tab) ? this.$route.query.tab : 'market'
     this.loadUpcoming()
     this.loadDigests()
   },
   watch: {
     '$route.query.tab' (tab) {
-      this.activeTab = tab === 'digests' ? 'digests' : 'upcoming'
+      this.activeTab = ['market', 'upcoming', 'digests'].includes(tab) ? tab : 'market'
     }
   },
   activated () {
