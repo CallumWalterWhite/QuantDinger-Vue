@@ -7,6 +7,9 @@
             <a-tab-pane key="market" :tab="$t('events.market.title')">
               <market-calendar />
             </a-tab-pane>
+            <a-tab-pane v-if="isAdmin" key="research" :tab="$t('earningsResearch.title')">
+              <earnings-research />
+            </a-tab-pane>
             <a-tab-pane key="upcoming" :tab="$t('events.tab.upcoming')">
               <a-table
                 :columns="upcomingColumns"
@@ -83,11 +86,12 @@
 import { getEventDigests, getUpcomingEvents } from '@/api/events'
 import DigestSettingsCard from './DigestSettingsCard'
 import MarketCalendar from './MarketCalendar'
+import EarningsResearch from './EarningsResearch'
 import { actionKey, earningsBadge, normalizeDigest, stanceColor } from './eventCalendarFormat.mjs'
 
 export default {
   name: 'EventCalendar',
-  components: { DigestSettingsCard, MarketCalendar },
+  components: { DigestSettingsCard, MarketCalendar, EarningsResearch },
   data () {
     return {
       activeTab: 'market',
@@ -104,6 +108,11 @@ export default {
     }
   },
   computed: {
+    isAdmin () {
+      const user = this.$store.state.user
+      const roles = [user.info && user.info.role, ...(Array.isArray(user.roles) ? user.roles : [user.roles])]
+      return roles.some(role => role === 'admin' || (role && role.id === 'admin'))
+    },
     isDarkTheme () {
       return ['dark', 'realdark'].includes(this.$store.state.app.theme)
     },
@@ -124,13 +133,13 @@ export default {
     }
   },
   mounted () {
-    this.activeTab = ['market', 'upcoming', 'digests'].includes(this.$route.query.tab) ? this.$route.query.tab : 'market'
+    this.activeTab = this.allowedTab(this.$route.query.tab)
     this.loadUpcoming()
     this.loadDigests()
   },
   watch: {
     '$route.query.tab' (tab) {
-      this.activeTab = ['market', 'upcoming', 'digests'].includes(tab) ? tab : 'market'
+      this.activeTab = this.allowedTab(tab)
     }
   },
   activated () {
@@ -138,6 +147,7 @@ export default {
     this.loadDigests()
   },
   methods: {
+    allowedTab (tab) { return ['market', 'upcoming', 'digests', ...(this.isAdmin ? ['research'] : [])].includes(tab) ? tab : 'market' },
     stanceColor,
     actionKey,
     badge: earningsBadge,
